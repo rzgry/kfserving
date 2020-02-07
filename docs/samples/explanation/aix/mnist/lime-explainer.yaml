@@ -1,0 +1,35 @@
+apiVersion: serving.kubeflow.org/v1alpha2
+kind: InferenceService
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: limeserver
+spec:
+  default:
+    predictor:
+      custom:
+        container:
+          name: predictor
+          image: ibmandrewbutler/lime-server:predictor
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "2Gi"
+              cpu: "1"
+            limits:
+              memory: "2Gi"
+              cpu: "1"
+    explainer:
+      custom:
+        container:
+          name: explainer
+          image: ibmandrewbutler/lime-server:explainer
+          command: ["python", "-m", "limeserver", "--predictor_host", "limeserver-predictor-default.default.svc.cluster.local", "--num_classes", "10", "--flattened_size", "2352", "--min_weight","0.01"]
+          imagePullPolicy: Always
+          resources:
+            requests:
+              memory: "4Gi"
+              cpu: "2"
+            limits:
+              memory: "4Gi"
+              cpu: "2"
