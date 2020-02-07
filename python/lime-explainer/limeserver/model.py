@@ -20,18 +20,17 @@ from lime.wrappers.scikit_image import SegmentationAlgorithm
 
 
 class LIMEModel(kfserving.KFModel):  # pylint:disable=c-extension-no-member
-    def __init__(self, name: str, predictor_host: str, flattened_size: str, segm_alg: str,
-                 num_samples: str, top_labels: str, min_weight: str, positive_only: str):
+    def __init__(self, name: str, predictor_host: str, segm_alg: str,
+                num_samples: str, top_labels: str, min_weight: str, positive_only: str):
         super().__init__(name)
         print("INIT")
         self.name = name
         self.top_labels = int(top_labels)
         self.num_samples = int(num_samples)
         self.segmentation_alg = segm_alg
-        self.flattened_size = int(flattened_size)
         self.predictor_host = predictor_host
         self.min_weight = float(min_weight)
-        self.positive_only = positive_only.lower() == "true" | positive_only.lower() == "t"
+        self.positive_only = (positive_only.lower() == "true") | (positive_only.lower() == "t")
         self.ready = False
 
     def load(self):
@@ -49,26 +48,27 @@ class LIMEModel(kfserving.KFModel):  # pylint:disable=c-extension-no-member
         print("Explaining now")
         instances = request["instances"]
         try:
-            inputs = np.array(instances[0])     #input is expected to be a batch of rgb images
+            inputs = np.array(instances[0])
         except Exception as err:
             raise Exception(
                 "Failed to initialize NumPy array from inputs: %s, %s" % (err, instances))
         try:
 
             explainer = LimeImageExplainer(verbose=False)
-            segmenter = SegmentationAlgorithm(self.segmentation_alg,
-                                              kernel_size=1, max_dist=200, ratio=0.2)
+            segmenter = SegmentationAlgorithm(self.segmentation_alg, kernel_size=1,
+                                              max_dist=200, ratio=0.2)
             explanation = explainer.explain_instance(inputs,
                                                      classifier_fn=self._predict,
-                                                     top_labels=self.top_labels, 
-                                                     hide_color=0, num_samples=self.num_samples, 
+                                                     top_labels=self.top_labels,
+                                                     hide_color=0,
+                                                     num_samples=self.num_samples,
                                                      segmentation_fn=segmenter)
 
             temp = []
             masks = []
             for i in range(0, self.top_labels):
                 temp, mask = explanation.get_image_and_mask(explanation.top_labels[i], 
-                                                            positive_only=self.positive_only,
+                                                            positive_only=self.positive_only, 
                                                             num_features=10, 
                                                             hide_rest=False, 
                                                             min_weight=self.min_weight)
@@ -78,7 +78,7 @@ class LIMEModel(kfserving.KFModel):  # pylint:disable=c-extension-no-member
                 "temp": temp.tolist(),
                 "masks": masks,
                 "top_labels": np.array(explanation.top_labels).astype(np.int32).tolist()
-                }}
+            }}
 
         except Exception as err:
             raise Exception("Failed to explain %s" % err)
