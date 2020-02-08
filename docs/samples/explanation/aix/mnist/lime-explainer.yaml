@@ -24,7 +24,7 @@ spec:
         container:
           name: explainer
           image: ibmandrewbutler/lime-server:explainer
-          command: ["python", "-m", "limeserver", "--predictor_host", "limeserver-predictor-default.default.svc.cluster.local", "--num_classes", "10", "--flattened_size", "2352", "--min_weight","0.01"]
+          command: ["python", "-m", "limeserver", "--predictor_host", "limeserver-predictor-default.default.svc.cluster.local"]
           imagePullPolicy: Always
           resources:
             requests:
