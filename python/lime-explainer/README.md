@@ -11,3 +11,7 @@ Then push your docker image to your dockerhub repo (this will take some time)
 `docker push dockeruser/limeserver:latest`
 
 Once your docker image is pushed you can pull the image from `dockeruser/limeserver:latest` when deploying an inferenceservice by specifying the image in the yaml file.
+
+## Example 
+
+Try deploying [Lime with MNIST](https://github.com/drewbutlerbb4/kfserving/tree/master/docs/samples/explanation/aix/mnist)

@@ -9,17 +9,21 @@ Then find the url
 `kubectl get inferenceservice`
 
 ```
-NAME         URL                                                                                             READY   DEFAULT TRAFFIC   CANARY TRAFFIC   AGE
-limeserver   http://limeserver.drewbutlerbb4-cluster.sjc03.containers.appdomain.cloud/v1/models/limeserver   True    100                                40m
+NAME         URL                                                  READY   DEFAULT TRAFFIC   CANARY TRAFFIC   AGE
+limeserver   http://limeserver.somecluster/v1/models/limeserver   True    100                                40m
 ```
 
 Query the inferenceservice with the url
 
-`python query_explain.py http://limeserver.drewbutlerbb4-cluster.sjc03.containers.appdomain.cloud/v1/models/limeserver`
+```
+python query_explain.py http://limeserver.somecluster/v1/models/limeserver
+```
 
 To try a different MNIST example add a number to the end of the query
 
-`python query_explain.py http://limeserver.drewbutlerbb4-cluster.sjc03.containers.appdomain.cloud/v1/models/limeserver 100`
+```
+python query_explain.py http://limeserver.somecluster/v1/models/limeserver 100
+```
 
 ## Deploying LIME explanations for another Image Classifier
 
