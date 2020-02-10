@@ -21,7 +21,7 @@ from lime.wrappers.scikit_image import SegmentationAlgorithm
 
 class LIMEModel(kfserving.KFModel):  # pylint:disable=c-extension-no-member
     def __init__(self, name: str, predictor_host: str, segm_alg: str,
-                num_samples: str, top_labels: str, min_weight: str, positive_only: str):
+                 num_samples: str, top_labels: str, min_weight: str, positive_only: str):
         super().__init__(name)
         print("INIT")
         self.name = name
@@ -67,10 +67,10 @@ class LIMEModel(kfserving.KFModel):  # pylint:disable=c-extension-no-member
             temp = []
             masks = []
             for i in range(0, self.top_labels):
-                temp, mask = explanation.get_image_and_mask(explanation.top_labels[i], 
-                                                            positive_only=self.positive_only, 
-                                                            num_features=10, 
-                                                            hide_rest=False, 
+                temp, mask = explanation.get_image_and_mask(explanation.top_labels[i],
+                                                            positive_only=self.positive_only,
+                                                            num_features=10,
+                                                            hide_rest=False,
                                                             min_weight=self.min_weight)
                 masks.append(mask.tolist())
 

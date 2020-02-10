@@ -30,11 +30,15 @@ if len(sys.argv) > 2:
 if is_file:
     inputs = open(sys.argv[2])
     inputs = json.load(inputs)
+    actual = "unk"
 else:
     data = MNISTDataset()
-    test_num = 1002
     inputs = data.test_data[test_num]
-    input_label = data.test_labels[test_num]
+    labels = data.test_labels[test_num]
+    actual = 0
+    for x in range(1, len(labels)):
+        if labels[x] != 0:
+            actual = x
     inputs = gray2rgb(inputs.reshape((-1, 28, 28)))
     inputs = np.reshape(inputs, (28,28,3))
 input_image = {"instances": [inputs.tolist()]}
@@ -58,6 +62,6 @@ fig, m_axs = plt.subplots(2,5, figsize = (12,6))
 for i, c_ax in enumerate(m_axs.flatten()):
     mask = masks[i]
     c_ax.imshow(label2rgb(mask, temp, bg_label = 0), interpolation = 'nearest')
-    c_ax.set_title('Positive for {}\nActual {}'.format(top_labels[i], 2))
+    c_ax.set_title('Positive for {}\nActual {}'.format(top_labels[i], actual))
     c_ax.axis('off')
 plt.show()
