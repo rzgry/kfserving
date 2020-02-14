@@ -4,7 +4,7 @@ To deploy the inferenceservice
 
 `kubectl apply -f lime-explainer.yaml`
 
-Then find the url
+Then find the url.
 
 `kubectl get inferenceservice`
 
@@ -13,13 +13,13 @@ NAME         URL                                                  READY   DEFAUL
 limeserver   http://limeserver.somecluster/v1/models/limeserver   True    100                                40m
 ```
 
-Query the inferenceservice with the url and append `:explain` to signify the query as an explanation
+Query the inferenceservice with the url and append `:explain` to signify the query is asking for an explanation.
 
 ```
 python query_explain.py http://limeserver.somecluster/v1/models/limeserver:explain
 ```
 
-To try a different MNIST example add a number to the end of the query
+To try a different MNIST example add an integer to the end of the query between 0-10,000. The integer chosen will be the index of the image to be chosen in the MNIST dataset.
 
 ```
 python query_explain.py http://limeserver.somecluster/v1/models/limeserver:explain 100
@@ -57,7 +57,7 @@ Then deploy your inferenceservice.
 
 ## Troubleshooting
 
-`<504> Gateway Timeout <504>` - the explainer is probably taking to long and not sending a response back quickly enough. Either there aren't enough resources allocated or the number of samples the explainer is allowed to take needs to be reduced. To fix this go to lime-explainer.yaml and increase resources. Or to lower the number of allowed samples go to lime-explainer.yaml and add a flag to `explainer: command:` '--num_samples' (the default number of samples is 1000)
+`<504> Gateway Timeout <504>` - the explainer is probably taking too long and not sending a response back quickly enough. Either there aren't enough resources allocated or the number of samples the explainer is allowed to take needs to be reduced. To fix this go to lime-explainer.yaml and increase resources. Or to lower the number of allowed samples go to lime-explainer.yaml and add a flag to `explainer: command:` '--num_samples' (the default number of samples is 1000)
 
 
 `<Response [404]>` - Make sure to add `:explain` to the end of the inferenceservice url. Otherwise try taking down the inferenceservice with `kubectl delete inferenceservice limeserver` and then putting it back up again with the `kubectl apply` command used previously.
