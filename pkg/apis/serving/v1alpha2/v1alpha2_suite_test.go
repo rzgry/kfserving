@@ -18,12 +18,13 @@ package v1alpha2
 
 import (
 	"context"
-	"github.com/kubeflow/kfserving/pkg/constants"
-	"k8s.io/api/core/v1"
 	"os"
 	"path/filepath"
 	"testing"
 
+	"github.com/kubeflow/kfserving/pkg/constants"
+
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -45,6 +46,7 @@ const (
 	DefaultTensorRTRuntimeVersion       = "19.05-py3"
 	DefaultONNXRuntimeVersion           = "v0.5.0"
 	DefaultAlibiExplainerRuntimeVersion = "0.2.3"
+	DefaultAIXExplainerRuntimeVersion   = "0.2.2"
 )
 
 func TestMain(m *testing.M) {

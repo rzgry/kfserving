@@ -37,7 +37,7 @@ func (s *AIXExplainerSpec) CreateExplainerContainer(modelName string, parallelis
 		args = append(args, "--storage_uri", constants.DefaultModelLocalMountPath)
 	}
 
-	args = append(args, string(s.Type))
+	args = append(args, "--explainer_type", string(s.Type))
 
 	// Order explainer config map keys
 	var keys []string
