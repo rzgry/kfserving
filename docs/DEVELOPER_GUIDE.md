@@ -14,7 +14,6 @@
     - [Deploy KFServing with your own version](#deploy-kfserving-with-your-own-version)
     - [Smoke test after deployment](#smoke-test-after-deployment)
   - [Iterating](#iterating)
-    - [Knative CLI (knctl):](#knative-cli-knctl)
   - [Troubleshooting](#troubleshooting)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
@@ -55,11 +54,11 @@ You must install these tools:
 KFServing currently requires `Knative Serving` for auto-scaling, canary rollout, `Istio` for traffic routing and ingress.
 
 * You can follow the instructions on [Set up a kubernetes cluster and install Knative Serving](https://knative.dev/docs/install/) or
-[Custom Install](https://knative.dev/docs/install/knative-custom-install) to install `Istio` and `Knative Serving`. Observability plug-ins are good to have for monitoring. For working with KFServing master, we would recommend KNative 0.9.0+ and Istion 1.3.1+
+[Custom Install](https://knative.dev/docs/install/knative-custom-install) to install `Istio` and `Knative Serving`. Observability plug-ins are good to have for monitoring.
 
-* If you already have `Istio` or `Knative` (e.g. from a Kubeflow install) then you don't need to install them explictily. From Kubeflow v0.7 onwards, KNative 0.8 and Istio 1.1.6 are installed by default as part of the Kubeflow installation, and that's the combination which has been tested with last release of KFServing 0.2.2
+* If you already have `Istio` or `Knative` (e.g. from a Kubeflow install) then you don't need to install them explictly, as long as version dependencies are satisfied. With Kubeflow v0.7, KNative 0.8 and Istio 1.1.6 are installed by default as part of the Kubeflow installation. From Kubeflow 1.0 onwards, KNative 0.11.1 and Istio 1.1.6 are installed by default. If you are using DEX based config for Kubeflow 1.0, Istio 1.3.1 is installed by default in your Kubeflow cluster. To summarize, we would recommend KNative 0.11.1 at a minimum for KFServing 0.2.2 and for the KFServing code in master. For Istio use versions 1.1.6 and 1.3.1 which have been tested, and for Kubernetes use 1.15+ 
 
-* You need follow the instructions on [Updating your install to use cluster local gateway](https://knative.dev/v0.9-docs/install/installing-istio/#updating-your-install-to-use-cluster-local-gateway) to add cluster local gateway to your cluster if you are on knative serving 0.9.0+.
+* You need follow the instructions on [Updating your install to use cluster local gateway](https://knative.dev/docs/install/installing-istio/#updating-your-install-to-use-cluster-local-gateway) to add cluster local gateway to your cluster to serve cluster-internal traffic for transformer and explainer use cases.
 
 ### Setup your environment
 
@@ -228,52 +227,6 @@ controller is simply:
 ```shell
 make deploy-dev
 ```
-
-### Knative CLI (knctl):
-
-You can also use [Knative CLI (`knctl`)](https://github.com/cppforlife/knctl) to interact with models deployed on KFServing. It provides a simple set of commands to interact with a [Knative installation](https://github.com/knative/docs). You can grab pre-built binaries from the [Releases page](https://github.com/cppforlife/knctl/releases). Once downloaded, you can run the following commands to get it working.
-
-```
-# compare checksum output to what's included in the release notes
-$ shasum -a 256 ~/Downloads/knctl-*
-
-# move binary to your system’s /usr/local/bin -- might require root password
-$ mv ~/Downloads/knctl-* /usr/local/bin/knctl
-
-# make the newly copied file executable -- might require root password
-$ chmod +x /usr/local/bin/knctl
-```
-
-You can then run a smoke test by running the following command to show the details of tensorflow sample revision.
-
-```
-knctl revision show -r flowers-sample-default-4s74r
-Revision 'flowers-sample-default-4s74r'
-
-Name          flowers-sample-default-4s74r  
-Tags          -  
-Image digest  index.docker.io/tensorflow/serving@sha256:df3c6fe1fbe5ccc3a916984ff313cc2d17e617f7b8782fc31e762c491325d813  
-Log URL       http://localhost:8001/api/v1/namespaces/knative-monitoring/services/kibana-logging/proxy/app/kibana#/discover?_a=(query:(match:(kubernetes.labels.knative-dev%2FrevisionUID:(query:'1135797e-8585-11e9-adbd-b680f8334647',type:phrase))))  
-Annotations   autoscaling.knative.dev/class: kpa.autoscaling.knative.dev  
-              autoscaling.knative.dev/target: "1"  
-Age           1h  
-
-Conditions
-
-Type                Status  Age  Reason     Message  
-Active              False   59m  NoTraffic  The target is not receiving traffic.  
-BuildSucceeded      True    1h   -          -  
-ContainerHealthy    True    1h   -          -  
-Ready               True    1h   -          -  
-ResourcesAvailable  True    1h   -          -  
-
-Pods conditions
-
-Pod  Type  Status  Age  Reason  Message  
-
-Succeeded 
-```
-
 ## Troubleshooting
 
 1. If you are on kubernetes 1.15+, we highly recommend adding object selector on kfserving pod mutating webhook configuration so that only pods managed by kfserving go through the kfserving pod mutator
@@ -282,7 +235,44 @@ Succeeded
 kubectl patch mutatingwebhookconfiguration inferenceservice.serving.kubeflow.org --patch '{"webhooks":[{"name": "inferenceservice.kfserving-webhook-server.pod-mutator","objectSelector":{"matchExpressions":[{"key":"serving.kubeflow.org/inferenceservice", "operator": "Exists"}]}}]}'
 ```
 
-2. When you run make deploy, you may encounter an error like this:
+2. You may get one of the following errors after deploying KFServing
+
+```shell
+Reissued from statefulset/default: create Pod default-0 in StatefulSet default failed error: Internal error occurred: failed calling webhook "inferenceservice.kfserving-webhook-server.pod.mutator": Post https://kfserving-webhook-server-service.kubeflow.svc:443/mutate-pods?timeout=30s: service "kfserving-webhook-service" not found
+```
+
+Or while you are deploying the models
+
+```shell
+kubectl apply -f docs/samples/tensorflow/tensorflow.yaml
+Error from server (InternalError): error when creating "docs/samples/tensorflow/tensorflow.yaml": 
+Internal error occurred: failed calling webhook "inferenceservice.kfserving-webhook-server.defaulter": 
+Post https://kfserving-webhook-server-service.kfserving-system.svc:443/mutate-inferenceservices?timeout=30s:
+
+context deadline exceeded
+unexpected EOF
+dial tcp x.x.x.x:443: connect: connection refused
+```
+
+If above errors appear, first thing to check is if the KFServing controller is running
+
+```shell
+kubectl get po -n kfserving-system
+NAME                             READY   STATUS    RESTARTS   AGE
+kfserving-controller-manager-0   2/2     Running   2          13m
+```
+
+If it is, more often than not, it is caused by a stale webhook, since webhooks are immutable. Even if the KFServing controller is not running, you might have stale webhooks from last deployment causing other issues. Best is to delete them, and test again
+
+
+```shell
+kubectl delete mutatingwebhookconfigurations inferenceservice.serving.kubeflow.org &&  kubectl delete validatingwebhookconfigurations inferenceservice.serving.kubeflow.org && kubectl delete po kfserving-controller-manager-0  -n kfserving-system
+
+mutatingwebhookconfiguration.admissionregistration.k8s.io "inferenceservice.serving.kubeflow.org" deleted
+validatingwebhookconfiguration.admissionregistration.k8s.io "inferenceservice.serving.kubeflow.org" deleted
+```
+
+3. When you run make deploy, you may encounter an error like this:
 
 ```shell
 error: error validating "STDIN": error validating data: ValidationError(CustomResourceDefinition.spec.validation.openAPIV3Schema.properties.status.properties.conditions.properties.conditions.items): invalid type for io.k8s.apiextensions-apiserver.pkg.apis.apiextensions.v1beta1.JSONSchemaPropsOrArray: got "map", expected ""; if you choose to ignore these errors, turn validation off with --validate=false
@@ -297,7 +287,7 @@ Client Version: version.Info{Major:"1", Minor:"13", GitVersion:"v1.13.6", GitCom
 Server Version: version.Info{Major:"1", Minor:"13", GitVersion:"v1.13.6+IKS", GitCommit:"ac5f7341d5d0ce8ea8f206ba5b030dc9e9d4cc97", GitTreeState:"clean", BuildDate:"2019-05-09T13:26:51Z", GoVersion:"go1.11.5", Compiler:"gc", Platform:"linux/amd64"}
 ```
 
-3. When you run make deploy-dev, you may see an error like the one below:
+4. When you run make deploy-dev, you may see an error like the one below:
 
 ```shell
 2019/05/17 15:13:54 error processing import paths in "config/default/manager/manager.yaml": unsupported status code 401; body: 
@@ -307,48 +297,10 @@ Error: reading strategic merge patches [manager_image_patch.yaml]: evalsymlink f
 
 It`s a red herring. To resolve it, please ensure you have logged into dockerhub from you client machine.
 
-4. When you deploy the tensorflow sample, you may encounter an error like the one blow:
+5. When you deploy the tensorflow sample, you may encounter an error like the one blow:
 
 ```
 2019-09-28 01:52:23.345692: E tensorflow_serving/sources/storage_path/file_system_storage_path_source.cc:362] FileSystemStoragePathSource encountered a filesystem access error: Could not find base path /mnt/models for servable flowers-sample
 ```
 
 Please make sure not to deploy the inferenceservice in the `kfserving-system` or other namespaces where namespace has  `control-plane` as a label. The `storage-initializer` init container does not get injected for deployments in those namespaces since they do not go through the mutating webhook.
-
-5. You may get one of the following errors after 'make deploy-dev', and while deploying the sample model
-
-```shell
-kubectl apply -f docs/samples/tensorflow/tensorflow.yaml
-Error from server (InternalError): error when creating "docs/samples/tensorflow/tensorflow.yaml": 
-Internal error occurred: failed calling webhook "inferenceservice.kfserving-webhook-server.defaulter": 
-Post https://kfserving-webhook-server-service.kfserving-system.svc:443/mutate-inferenceservices?timeout=30s:
-```
-
-```shell
- context deadline exceeded
-```
-
-```shell
-unexpected EOF
-```
-
-```shell
-dial tcp x.x.x.x:443: connect: connection refused
-```
-
-If above errors appear, first thing to check is if the KFServing controller is running
-
-```shell
-kubectl get po -n kfserving-system
-NAME                             READY   STATUS    RESTARTS   AGE
-kfserving-controller-manager-0   2/2     Running   2          13m
-```
-
-If it is, more often than not, it is caused by a stale webhook, since webhooks are immutable. Please delete them, and test again
-
-```shell
-kubectl delete mutatingwebhookconfigurations inferenceservice.serving.kubeflow.org &&  kubectl delete validatingwebhookconfigurations inferenceservice.serving.kubeflow.org && kubectl delete po kfserving-controller-manager-0  -n kfserving-system
-
-mutatingwebhookconfiguration.admissionregistration.k8s.io "inferenceservice.serving.kubeflow.org" deleted
-validatingwebhookconfiguration.admissionregistration.k8s.io "inferenceservice.serving.kubeflow.org" deleted
-```

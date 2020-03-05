@@ -121,6 +121,13 @@ const (
 	InferenceServiceDefaultLoggerPort = "8081"
 )
 
+// Labels to put on kservice
+const (
+	KServiceComponentLabel = "component"
+	KServiceModelLabel     = "model"
+	KServiceEndpointLabel  = "endpoint"
+)
+
 // InferenceService default/canary constants
 const (
 	InferenceServiceDefault = "default"
@@ -129,9 +136,12 @@ const (
 
 // InferenceService model server args
 const (
-	ArgumentModelName     = "--model_name"
-	ArgumentPredictorHost = "--predictor_host"
-	ArgumentHttpPort      = "--http_port"
+	ArgumentModelName      = "--model_name"
+	ArgumentModelDir       = "--model_dir"
+	ArgumentModelClassName = "--model_class_name"
+	ArgumentPredictorHost  = "--predictor_host"
+	ArgumentHttpPort       = "--http_port"
+	ArgumentWorkers        = "--workers"
 )
 
 // InferenceService container name

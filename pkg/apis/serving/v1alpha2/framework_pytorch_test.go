@@ -16,6 +16,7 @@ func TestFrameworkPytorch(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 	allowedPyTorchImageVersionsArray := []string{
 		DefaultPyTorchRuntimeVersion,
+		DefaultPyTorchRuntimeVersionGPU,
 	}
 	allowedPyTorchImageVersions := strings.Join(allowedPyTorchImageVersionsArray, ", ")
 
@@ -35,18 +36,33 @@ func TestFrameworkPytorch(t *testing.T) {
 			},
 			matcher: gomega.MatchError(fmt.Sprintf(InvalidPyTorchRuntimeVersionError, allowedPyTorchImageVersions)),
 		},
-	}
-
-	for name, scenario := range scenarios {
-		config := &InferenceServicesConfig{
-			Predictors: &PredictorsConfig{
-				PyTorch: PredictorConfig{
-					ContainerImage:       "kfserving/pytorchserver",
-					DefaultImageVersion:  "latest",
-					AllowedImageVersions: allowedPyTorchImageVersionsArray,
+		"RejectGPUResourcesExcluded": {
+			spec: PyTorchSpec{
+				RuntimeVersion: DefaultPyTorchRuntimeVersionGPU,
+			},
+			matcher: gomega.MatchError(fmt.Sprintf(InvalidPyTorchRuntimeExcludesGPU, allowedPyTorchImageVersions)),
+		},
+		"RejectGPUResourcesIncluded": {
+			spec: PyTorchSpec{
+				RuntimeVersion: DefaultPyTorchRuntimeVersion,
+				Resources: v1.ResourceRequirements{
+					Limits: v1.ResourceList{constants.NvidiaGPUResourceType: resource.MustParse("1")},
 				},
 			},
-		}
+			matcher: gomega.MatchError(fmt.Sprintf(InvalidPyTorchRuntimeIncludesGPU, allowedPyTorchImageVersions)),
+		},
+	}
+
+	config := &InferenceServicesConfig{
+		Predictors: &PredictorsConfig{
+			PyTorch: PredictorConfig{
+				ContainerImage:       "kfserving/pytorchserver",
+				DefaultImageVersion:  "0.1.0",
+				AllowedImageVersions: allowedPyTorchImageVersionsArray,
+			},
+		},
+	}
+	for name, scenario := range scenarios {
 		g.Expect(scenario.spec.Validate(config)).Should(scenario.matcher, fmt.Sprintf("Testing %s", name))
 	}
 }
@@ -94,6 +110,23 @@ func TestCreatePytorchModelServingContainer(t *testing.T) {
 	}
 
 	// Test Create with config
-	container := spec.GetContainer("someName", &config)
+	container := spec.GetContainer("someName", 0, &config)
 	g.Expect(container).To(gomega.Equal(expectedContainer))
+
+	// Test Parallelism
+	expectedParallelism := &v1.Container{
+		Image:     "someOtherImage:0.1.0",
+		Name:      constants.InferenceServiceContainerName,
+		Resources: requestedResource,
+		Args: []string{
+			"--model_name=someName",
+			"--model_class_name=Net",
+			"--model_dir=/mnt/models",
+			"--http_port=8080",
+			"--workers=1",
+		},
+	}
+
+	containerWithPar := spec.GetContainer("someName", 1, &config)
+	g.Expect(containerWithPar).To(gomega.Equal(expectedParallelism))
 }
