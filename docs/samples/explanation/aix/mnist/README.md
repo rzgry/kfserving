@@ -4,7 +4,7 @@ To deploy the inferenceservice
 
 `kubectl apply -f aix-explainer.yaml`
 
-Then find the url
+Then find the url.
 
 `kubectl get inferenceservice`
 
@@ -13,13 +13,13 @@ NAME         URL                                               READY   DEFAULT T
 aixserver   http://aixserver.somecluster/v1/models/aixserver   True    100                                40m
 ```
 
-Query the inferenceservice with the url
+Query the inferenceservice with the url and append `:explain` to signify the query is asking for an explanation.
 
 ```
 python query_explain.py http://aixserver.somecluster/v1/models/aixserver
 ```
 
-To try a different MNIST example add a number to the end of the query
+To try a different MNIST example add an integer to the end of the query between 0-10,000. The integer chosen will be the index of the image to be chosen in the MNIST dataset.
 
 ```
 python query_explain.py http://aixserver.somecluster/v1/models/aixserver 100
@@ -50,6 +50,10 @@ image: <your image endpoint>
 Then deploy your inferenceservice.
 
 `kubectl apply -f aix-explainer.yaml`
+
+## Stopping the Inference Service
+
+`kubectl delete inferenceservice limeserver`
 
 ## Troubleshooting
 
