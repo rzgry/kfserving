@@ -1,33 +1,33 @@
-# Using LIME to get explanations for MNIST classifications
+# Using AIX to get explanations for MNIST classifications
 
 To deploy the inferenceservice
 
-`kubectl apply -f lime-explainer.yaml`
+`kubectl apply -f aix-explainer.yaml`
 
 Then find the url
 
 `kubectl get inferenceservice`
 
 ```
-NAME         URL                                                  READY   DEFAULT TRAFFIC   CANARY TRAFFIC   AGE
-limeserver   http://limeserver.somecluster/v1/models/limeserver   True    100                                40m
+NAME         URL                                               READY   DEFAULT TRAFFIC   CANARY TRAFFIC   AGE
+aixserver   http://aixserver.somecluster/v1/models/aixserver   True    100                                40m
 ```
 
 Query the inferenceservice with the url
 
 ```
-python query_explain.py http://limeserver.somecluster/v1/models/limeserver
+python query_explain.py http://aixserver.somecluster/v1/models/aixserver
 ```
 
 To try a different MNIST example add a number to the end of the query
 
 ```
-python query_explain.py http://limeserver.somecluster/v1/models/limeserver 100
+python query_explain.py http://aixserver.somecluster/v1/models/aixserver 100
 ```
 
-## Deploying LIME explanations for another Image Classifier
+## Deploying AIX explanations for another Image Classifier
 
-This section is for users who have another Image classifier which you would like to get explanations for. Change the image from `ibmandrewbutler/lime-server:predictor` to the endpoint of your image in lime-explainer.yaml.
+This section is for users who have another Image classifier which you would like to get explanations for. Change the image from `aipipeline/aix-explainer:0.2.2` to the endpoint of your image in aix-explainer.yaml.
 
 ```
 name: predictor
@@ -36,11 +36,11 @@ image: <your image endpoint>
 
 Then deploy your inferenceservice.
 
-`kubectl apply -f lime-explainer.yaml`
+`kubectl apply -f aix-explainer.yaml`
 
 ## Deploying a Development Explainer Image
 
-To deploy a development image go to `lime-explainer.yaml` and change the original explainer image to the endpoint of your image.
+To deploy a development image go to `aix-explainer.yaml` and change the original explainer image to the endpoint of your image.
 
 ```
 name: explainer
@@ -49,8 +49,8 @@ image: <your image endpoint>
 
 Then deploy your inferenceservice.
 
-`kubectl apply -f lime-explainer.yaml`
+`kubectl apply -f aix-explainer.yaml`
 
 ## Troubleshooting
 
-`<504> Gateway Timeout <504>` - the explainer is probably taking to long and not sending a response back quickly enough. Either there aren't enough resources allocated or the number of samples the explainer is allowed to take needs to be reduced. To fix this go to lime-explainer.yaml and increase resources. Or to lower the number of allowed samples go to lime-explainer.yaml and add a flag to `explainer: command:` '--num_samples' (the default number of samples is 1000)
+`<504> Gateway Timeout <504>` - the explainer is probably taking to long and not sending a response back quickly enough. Either there aren't enough resources allocated or the number of samples the explainer is allowed to take needs to be reduced. To fix this go to aix-explainer.yaml and increase resources. Or to lower the number of allowed samples go to aix-explainer.yaml and add a flag to `explainer: command:` '--num_samples' (the default number of samples is 1000)

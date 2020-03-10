@@ -20,16 +20,16 @@ tests_require = [
     'mypy'
 ]
 setup(
-    name='limeserver',
+    name='aixserver',
     version='0.2.1',
     author_email='Andrew.Butler@ibm.com',
     license='https://github.com/kubeflow/kfserving/LICENSE',
-    url='https://github.com/kubeflow/kfserving/python/limeserver',
+    url='https://github.com/kubeflow/kfserving/python/aixserver',
     description='Model Server implementation for AI eXplainability with LIME. \
                  Not intended for use outside KFServing Frameworks Images',
     long_description=open('README.md').read(),
     python_requires='>3.4',
-    packages=find_packages("limeserver"),
+    packages=find_packages("aixserver"),
     install_requires=[
         "kfserving>=0.2.1",
         "argparse >= 1.4.0",

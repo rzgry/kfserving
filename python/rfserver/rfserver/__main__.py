@@ -12,4 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from .model import LIMEModel
+import kfserving
+import argparse
+import os
+
+from .model import RFModel
+
+DEFAULT_MODEL_NAME = "rfserver"
+
+parser = argparse.ArgumentParser(parents=[kfserving.kfserver.parser])
+parser.add_argument('--model_name', default=DEFAULT_MODEL_NAME,
+                    help='The name that the model is served under.')
+args, _ = parser.parse_known_args()
+
+if __name__ == "__main__":
+    model = RFModel(args.model_name)
+    model.load()
+    kfserving.KFServer().start([model])

@@ -3,14 +3,15 @@ kind: InferenceService
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: limeserver
+  name: aixserver
 spec:
   default:
     predictor:
       custom:
         container:
           name: predictor
-          image: ibmandrewbutler/lime-server:predictor
+          image: aipipeline/rf-predictor:0.2.2
+          command: ["python", "-m", "rfserver", "--model_name", "aixserver"]
           imagePullPolicy: Always
           resources:
             requests:
@@ -23,8 +24,8 @@ spec:
       custom:
         container:
           name: explainer
-          image: ibmandrewbutler/lime-server:explainer
-          command: ["python", "-m", "limeserver", "--predictor_host", "limeserver-predictor-default.default.svc.cluster.local"]
+          image: aipipeline/aix-explainer:0.2.2
+          command: ["python", "-m", "aixserver", "--predictor_host", "aixserver-predictor-default.default.svc.cluster.local", "explainer_type", "other"]
           imagePullPolicy: Always
           resources:
             requests:
