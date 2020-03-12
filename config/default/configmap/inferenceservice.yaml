@@ -72,10 +72,10 @@ data:
             ]
         },
         "aix": {
-            "image" : "aipipeline/lime-server",
-            "defaultImageVersion": "explainer",
+            "image" : "aipipeline/aix-explainer",
+            "defaultImageVersion": "0.2.2",
             "allowedImageVersions": [
-               "explainer"
+               "0.2.2"
             ]
         }
     }
