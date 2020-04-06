@@ -53,7 +53,7 @@ Then deploy your inferenceservice.
 
 ## Stopping the Inference Service
 
-`kubectl delete inferenceservice limeserver`
+`kubectl delete -f aix-explainer.yaml`
 
 ## Troubleshooting
 
