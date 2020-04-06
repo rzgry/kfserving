@@ -16,13 +16,13 @@ aixserver   http://aixserver.somecluster/v1/models/aixserver   True    100      
 Query the inferenceservice with the url and append `:explain` to signify the query is asking for an explanation.
 
 ```
-python query_explain.py http://aixserver.somecluster/v1/models/aixserver
+python query_explain.py http://aixserver.somecluster/v1/models/aixserver:explain
 ```
 
 To try a different MNIST example add an integer to the end of the query between 0-10,000. The integer chosen will be the index of the image to be chosen in the MNIST dataset.
 
 ```
-python query_explain.py http://aixserver.somecluster/v1/models/aixserver 100
+python query_explain.py http://aixserver.somecluster/v1/models/aixserver:explain 100
 ```
 
 ## Deploying AIX explanations for another Image Classifier
@@ -58,3 +58,5 @@ Then deploy your inferenceservice.
 ## Troubleshooting
 
 `<504> Gateway Timeout <504>` - the explainer is probably taking to long and not sending a response back quickly enough. Either there aren't enough resources allocated or the number of samples the explainer is allowed to take needs to be reduced. To fix this go to aix-explainer.yaml and increase resources. Or to lower the number of allowed samples go to aix-explainer.yaml and add a flag to `explainer: command:` '--num_samples' (the default number of samples is 1000)
+
+If you see `Configuration "aixserver-explainer-default" does not have any ready Revision` the container may have taken too long to download. If you run `kubectl get revision` and see your revision is stuck in `ContainerCreating` try deleting the inferenceservice and redeploying.
