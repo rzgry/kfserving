@@ -35,6 +35,7 @@ setup(
         "kfserving>=0.2.1",
         "argparse >= 1.4.0",
         "numpy >= 1.8.2",
+        "aif360 >= 0.2.3"
     ],
     tests_require=tests_require,
     extras_require={'test': tests_require}
