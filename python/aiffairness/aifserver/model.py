@@ -20,25 +20,6 @@ import pandas as pd
 from aif360.metrics import BinaryLabelDatasetMetric
 from aif360.datasets import BinaryLabelDataset
 
-
-# Temp imports
-# TODO: Remove this when we call predictor container directly
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from aif360.algorithms.preprocessing.optim_preproc_helpers.data_preproc_functions import load_preproc_data_german
-from aif360.datasets import GermanDataset
-
-np.random.seed(1)
-dataset_orig = load_preproc_data_german(['age'])
-dataset_orig_train, _ = dataset_orig.split([0.9], shuffle=True)
-scale_orig = StandardScaler()
-X_train = scale_orig.fit_transform(dataset_orig_train.features)
-y_train = dataset_orig_train.labels.ravel()
-lmod = LogisticRegression()
-lmod.fit(X_train, y_train,
-         sample_weight=dataset_orig_train.instance_weights)
-
-
 class AIFModel(kfserving.KFModel):
     def __init__(self, name: str, predictor_host: str, feature_names: list, label_names: list, favorable_label: float, unfavorable_label: float, privileged_groups: list, unprivileged_groups: list):
         self.name = name
@@ -56,15 +37,11 @@ class AIFModel(kfserving.KFModel):
         self.ready = True
 
     def _predict(self, inputs):
-        # TEMP Use german dataset for predictions
-        # TODO: call self.predict to make a prediction to the predictor_host parameter
-        # predictions = self.predict(scoring_data)
-        scale_input = StandardScaler()
-        scaled_input = scale_input.fit_transform(inputs)
-
-        predictions = lmod.predict(scaled_input)
-
-        return predictions.tolist()
+        print("SENDING INPUTS TO PREDICTOR")
+        predictions = self.predict({
+            "instances": inputs
+        })
+        return predictions['predictions']
 
     def explain(self, request: Dict) -> Dict:
         print("EXPLAINING")
