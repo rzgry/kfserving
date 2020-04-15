@@ -20,6 +20,7 @@ import pandas as pd
 from aif360.metrics import BinaryLabelDatasetMetric
 from aif360.datasets import BinaryLabelDataset
 
+
 class AIFModel(kfserving.KFModel):
     def __init__(self, name: str, predictor_host: str, feature_names: list, label_names: list, favorable_label: float, unfavorable_label: float, privileged_groups: list, unprivileged_groups: list):
         self.name = name
@@ -64,6 +65,12 @@ class AIFModel(kfserving.KFModel):
         return {
             "predictions": predictions,
             "metrics": {
-                "disparate_impact": metrics.disparate_impact()
+                "base_rate": metrics.base_rate(),
+                "consistency": metrics.consistency().tolist(),
+                "disparate_impact": metrics.disparate_impact(),
+                "num_instances": metrics.num_instances(),
+                "num_negatives": metrics.num_negatives(),
+                "num_positives": metrics.num_positives(),
+                "statistical_parity_difference": metrics.statistical_parity_difference(),
             }
         }
