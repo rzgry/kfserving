@@ -44,8 +44,8 @@ class AIFModel(kfserving.KFModel):
         })
         return predictions['predictions']
 
-    def explain(self, request: Dict) -> Dict:
-        print("EXPLAINING")
+    def bias_detection(self, request: Dict) -> Dict:
+        print("BIAS DETECTION")
         inputs = request["instances"]
         predictions = self._predict(inputs)
 

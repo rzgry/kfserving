@@ -7,4 +7,4 @@ RUN pip install --upgrade pip && pip install -e ./kfserving
 COPY aiffairness aiffairness
 RUN pip install -e ./aiffairness
 
-ENTRYPOINT ["python", "-m", "aiffairness"]
+ENTRYPOINT ["python", "-m", "aifserver"]
